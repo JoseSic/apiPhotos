@@ -167,7 +167,7 @@ const dtaPagination = (offset, limit, dataArray) => {
 
   newData = dataArray.slice(offset, limitArray);
   console.log("offset", dataArray.slice(offset, limitArray));
-
+  console.log("offset", dataArray.slice(offset, limitArray));
   return newData;
 };
 
