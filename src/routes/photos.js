@@ -42,7 +42,7 @@ const titleFilter = (photosData, titleFilter) => {
     return photosData;
   }
   const photosFilter = photosData.filter((item) =>
-    item.title.trim().includes(titleFilter.trim())
+    item.title.trim().includes(titleFilter)
   );
 
   return photosFilter; /*  */
@@ -53,7 +53,7 @@ const albumTitleFilter = (albumsData, albumTitleFilter) => {
     return albumsData; /*  */
   }
   const albumFilter = albumsData.filter((item) =>
-    item.title.trim().includes(albumTitleFilter.trim())
+    item.title.trim().includes(albumTitleFilter)
   );
 
   return albumFilter;
