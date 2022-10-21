@@ -37,60 +37,40 @@ const transformedData = (users, albums, photos) => {
   return newData;
 };
 
-const titleFilter = (photosData, titleArray) => {
-  if (!titleArray) {
+const titleFilter = (photosData, titleFilter) => {
+  if (!titleFilter) {
     return photosData;
   }
-
-  const photosFilter = photosData.filter((photoItem) =>
-    titleArray.every((titleItem) => photoItem.title.includes(titleItem.trim()))
+  const photosFilter = photosData.filter((item) =>
+    item.title.trim().includes(titleFilter.trim())
   );
-  /* const photosFilter = photosData.filter((photoItem) => {
-    for (let i = 0; i < titleArray.length; i++) {
-      if (!photoItem.title.includes(titleArray[i].trim())) {
-        return false;
-      }
-    }
-    return true;
-  }); */
-  return photosFilter;
+
+  return photosFilter; /*  */
 };
 
-const albumTitleFilter = (albumsData, albumTitleArray) => {
-  if (!albumTitleArray) {
-    return albumsData;
+const albumTitleFilter = (albumsData, albumTitleFilter) => {
+  if (!albumTitleFilter) {
+    return albumsData; /*  */
   }
-
-  const albumFilter = albumsData.filter((albumItem) =>
-    albumTitleArray.every((albumTitleItem) =>
-      albumItem.title.includes(albumTitleItem.trim())
-    )
+  const albumFilter = albumsData.filter((item) =>
+    item.title.trim().includes(albumTitleFilter.trim())
   );
 
-  /* const albulmsFilter = albumsData.filter((item) => {
-    for (let i = 0; i < albumTitleArray.length; i++) {
-      if (!item.title.includes(albumTitleArray[i].trim())) {
-        return false;
-      }
-    }
-    return true;
-  }); */
   return albumFilter;
 };
 
-const albumUserEmailFilter = (usersData, albumUserEmail) => {
-  if (!albumUserEmail) {
+const albumUserEmailFilter = (usersData, albumUserEmailFilter) => {
+  if (!albumUserEmailFilter) {
     return usersData;
   }
   const userFilter = usersData.filter(
-    (item) => item.email.trim() === albumUserEmail.trim()
+    (item) => item.email.trim() === albumUserEmailFilter.trim()
   );
 
   return userFilter;
 };
 
 const dtaPagination = (offset, limit, dataArray) => {
-  //tiene que ser desde la posicicion donde se quiere empezar a recoger los datos
   let newData = [];
   let numberOfPages = 0;
   let currentPage = 1;
@@ -104,16 +84,6 @@ const dtaPagination = (offset, limit, dataArray) => {
   if (dataArray.length === 0 || !dataArray) {
     return dataPhotos;
   }
-  //const newData = [13, 260, 318, 577, 4315];
-  /* let limitArray = (offset) + (limit);
-  limitArray = limitArray >= dataArray.length ? dataArray.length : limitArray;
- console.log(limitArray)
-  for (let index = offset; index < limitArray; index++) {
-    newData.push(dataArray[index]);
-  }
-  console.log(newData);  */
-
-  //aqui limit, debe de de ser un limit acumulado
   numberOfPages = Math.ceil(dataArray.length / limit);
   currentPage = offset === 0 ? 1 : Math.ceil((offset + limit) / limit);
   let limitArray = limit + offset;
@@ -149,17 +119,15 @@ router.get("/", async (req, res) => {
       });
 
     const title = req.query.title;
-    const titleArray = title ? title.trim().split("%20") : null;
     const albumTitle = req.query["album.title"];
-    const albumTitleArray = albumTitle ? albumTitle.trim().split(" ") : null;
     const albumUserEmail = req.query["album.user.email"];
     const offsetIsValid = req.query.offset;
     const offset = offsetIsValid ? +offsetIsValid : 0;
     const limitIsValid = req.query.limit;
     const limit = limitIsValid ? +limitIsValid : 25;
 
-    const photosFilter = titleFilter(photosData, titleArray);
-    const albumsFilter = albumTitleFilter(albumsData, albumTitleArray);
+    const photosFilter = titleFilter(photosData, title);
+    const albumsFilter = albumTitleFilter(albumsData, albumTitle);
     const userFilter = albumUserEmailFilter(usersData, albumUserEmail);
 
     const newData = transformedData(userFilter, albumsFilter, photosFilter);
