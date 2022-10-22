@@ -37,26 +37,13 @@ const transformedData = (users, albums, photos) => {
   return newData;
 };
 
-const titleFilter = (photosData, titleFilter) => {
-  if (!titleFilter) {
-    return photosData;
+const dataFilter = (data, filter) => {
+  if (!filter) {
+    return data;
   }
-  const photosFilter = photosData.filter((item) =>
-    item.title.trim().includes(titleFilter)
-  );
+  const newData = data.filter((item) => item.title.trim().includes(filter));
 
-  return photosFilter; /*  */
-};
-
-const albumTitleFilter = (albumsData, albumTitleFilter) => {
-  if (!albumTitleFilter) {
-    return albumsData; /*  */
-  }
-  const albumFilter = albumsData.filter((item) =>
-    item.title.trim().includes(albumTitleFilter)
-  );
-
-  return albumFilter;
+  return newData;
 };
 
 const albumUserEmailFilter = (usersData, albumUserEmailFilter) => {
@@ -115,7 +102,7 @@ router.get("/", async (req, res) => {
         })
       )
       .catch((errors) => {
-        console.log(errors);
+        throw new Error(errors.message);
       });
 
     const title = req.query.title;
@@ -126,8 +113,8 @@ router.get("/", async (req, res) => {
     const limitIsValid = req.query.limit;
     const limit = limitIsValid ? +limitIsValid : 25;
 
-    const photosFilter = titleFilter(photosData, title);
-    const albumsFilter = albumTitleFilter(albumsData, albumTitle);
+    const photosFilter = dataFilter(photosData, title);
+    const albumsFilter = dataFilter(albumsData, albumTitle);
     const userFilter = albumUserEmailFilter(usersData, albumUserEmail);
 
     const newData = transformedData(userFilter, albumsFilter, photosFilter);
@@ -136,7 +123,9 @@ router.get("/", async (req, res) => {
     res.status(200).json(dataOffset);
   } catch (error) {
     console.log(error.message);
-    res.status(500).json({ error: "error" });
+    res
+      .status(500)
+      .json({ error: `error: request not processed. info: ${error.message}` });
   }
 });
 
