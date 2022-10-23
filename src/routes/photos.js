@@ -1,6 +1,7 @@
 const { Router } = require("express");
 const router = Router();
 const axios = require("axios");
+
 const transformedData = (users, albums, photos) => {
   if (users.length === 0 || albums.length === 0 || photos.length === 0) {
     return [];
@@ -41,7 +42,9 @@ const dataFilter = (data, filter) => {
   if (!filter) {
     return data;
   }
-  const newData = data.filter((item) => item.title.trim().includes(filter));
+  const newData = data.filter((item) =>
+    item.title.trim().includes(filter.trim())
+  );
 
   return newData;
 };
@@ -50,14 +53,14 @@ const albumUserEmailFilter = (usersData, albumUserEmailFilter) => {
   if (!albumUserEmailFilter) {
     return usersData;
   }
-  const userFilter = usersData.filter(
+  const newData = usersData.filter(
     (item) => item.email.trim() === albumUserEmailFilter.trim()
   );
 
-  return userFilter;
+  return newData;
 };
 
-const dtaPagination = (offset, limit, dataArray) => {
+const dataPagination = (offset, limit, dataArray) => {
   let newData = [];
   let numberOfPages = 0;
   let currentPage = 1;
@@ -68,16 +71,17 @@ const dtaPagination = (offset, limit, dataArray) => {
     currentPage: currentPage,
     photos: [],
   };
+  
   if (dataArray.length === 0 || !dataArray) {
     return dataPhotos;
   }
+
   numberOfPages = Math.ceil(dataArray.length / limit);
   currentPage = offset === 0 ? 1 : Math.ceil((offset + limit) / limit);
   let limitArray = limit + offset;
   limitArray = limitArray > dataArray.length ? dataArray.length : limitArray;
 
   newData = dataArray.slice(offset, limitArray);
-  console.log("offset", dataArray.slice(offset, limitArray));
   dataPhotos.pages = numberOfPages;
   dataPhotos.currentPage = currentPage;
   dataPhotos.photos = newData;
@@ -109,20 +113,18 @@ router.get("/", async (req, res) => {
     const albumTitle = req.query["album.title"];
     const albumUserEmail = req.query["album.user.email"];
     const offsetIsValid = req.query.offset;
-    const offset = offsetIsValid ? +offsetIsValid : 0;
+    const offset = req.query.offset ? +req.query.offset : 0;
     const limitIsValid = req.query.limit;
-    const limit = limitIsValid ? +limitIsValid : 25;
+    const limit = req.query.limit ? +req.query.limit : 25;
 
     const photosFilter = dataFilter(photosData, title);
     const albumsFilter = dataFilter(albumsData, albumTitle);
     const userFilter = albumUserEmailFilter(usersData, albumUserEmail);
 
     const newData = transformedData(userFilter, albumsFilter, photosFilter);
-    const dataOffset = dtaPagination(offset, limit, newData);
-    console.log("result", title, dataOffset);
-    res.status(200).json(dataOffset);
+    const dataPage = dataPagination(offset, limit, newData);
+    res.status(200).json(dataPage);
   } catch (error) {
-    console.log(error.message);
     res
       .status(500)
       .json({ error: `error: request not processed. info: ${error.message}` });
